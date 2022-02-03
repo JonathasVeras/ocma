@@ -107,7 +107,7 @@ void readData(int h, int w, int v[h][w], char myId[MAX_STR], int *myX, int *myY,
 	primeiraChecagem==0;
 }
 
-Coordenada buscar_area_pesca(int altura, int largura, int v[altura][largura], int myX, int myY, Robalo robalo[100], Cioba cioba[100], Tainha tainha[100], Porto portos[100], int contadorRobalo, int contadorCioba, int contadorTainha, int contadorPorto )
+Coordenada buscar_area_pesca(int altura, int largura, int v[altura][largura], int myX, int myY, Robalo robalo[100], Cioba cioba[100], Tainha tainha[100], int contadorRobalo, int contadorCioba, int contadorTainha)
 {
 	Coordenada coordenada_buscada;
 	//Nesse algoritmo os "maisProximoCioba, etc" serão achados para ser feita uma comparação depois de qual está mais perto.
@@ -173,16 +173,64 @@ int produto_vetorial(int xBarco, int yBarco, int xPeixe, int yPeixe)
 	return((xBarco+xPeixe)*(xBarco+xPeixe))-((yBarco+yPeixe)*(yBarco+yPeixe));
 }
 
-void ir_ao_porto(int h, int w, int v[h][w], int myX, int myY)
+void mover(int xBarco, int yBarco, int xLocal, int yLocal, int *estou_no_local, int porto_ou_pesca)
 {
-	for (int i = 0; i < h; i++)
+	if (xBarco != xLocal || yBarco != yLocal)
 	{
-		for (int j = 0; j < w; j++)
+		if (xBarco>xLocal)
 		{
+			printf("LEFT\n");
+		}
+		else if (xBarco<xLocal)
+		{
+			printf("RIGHT\n");
+		}
+		else
+		{
+			if (yBarco>yLocal)
+			{
+				printf("UP\n");
+			}
+			else
+			{
+				printf("DOWN\n");
+			}
 			
+		}
+		
+	}
+	else
+	{
+		estou_no_local = 1;
+		if(porto_ou_pesca == 0)//pesca
+		{
+			printf("FISH\n");
+		}
+		else
+		{
+			printf("SELL\n");	
 		}
 	}
 	
+}
+
+Coordenada achar_porto(int h, int w, int v[h][w], int myX, int myY, Porto portos[100], int contadorPorto)
+{
+	Coordenada coordenada_buscada;
+	Porto maisProximoPorto=portos[0];
+	int pV_do_mais_proximo = produto_vetorial(myX, myY, portos[0].x, portos[0].y);
+	for (size_t i = 1; i < contadorPorto; i++)
+	{
+		int pVatual = produto_vetorial(myX, myY, portos[i].x, portos[i].y);
+		if (pVatual <= pV_do_mais_proximo)
+		{
+			maisProximoPorto = portos[i];
+			pV_do_mais_proximo = pVatual;
+		}
+	}
+	coordenada_buscada.x = maisProximoPorto.x;
+	coordenada_buscada.y = maisProximoPorto.y;
+	return coordenada_buscada;
 }
 
 int main()
@@ -201,7 +249,9 @@ int main()
 	int contadorRobalo=0, contadorCioba=0, contadorTainha=0, contadorPorto=0;
 	Coordenada indoPraLa;
 	int estou_em_area_de_pesca = 0;
+	int estou_no_porto = 0;
 	int tenho_area_de_pesca = 0;
+	int tenho_porto = 0;
 	// === INÍCIO DA PARTIDA ===
 	scanf("AREA %i %i", &altura, &largura); // lê a dimensão da área de pesca: altura (h) x largura (w)
 	scanf(" ID %s", myId);		 // ...e o id do bot
@@ -226,19 +276,35 @@ int main()
 		// INSIRA UMA LÓGICA PARA ESCOLHER UMA AÇÃO A SER EXECUTADA
 		if (limite_barco == 10)
 		{
-			ir_ao_porto();
+			if (tenho_porto == 0)
+			{
+				indoPraLa = achar_porto(largura,altura, v, myX, myY, portos, contadorPorto);
+				mover(myX, myY, indoPraLa.x, indoPraLa.y, estou_no_porto, 1);
+			}
+			else
+			{
+				mover(myX, myY, indoPraLa.x, indoPraLa.y, estou_no_porto, 1);
+			}
+			
 		}
 		else if(estou_em_area_de_pesca==0)
 		{
 			if (tenho_area_de_pesca==0)
 			{
-				indoPraLa = buscar_area_pesca(altura, largura, v, myX, myY, robalo, cioba, tainha, portos, contadorRobalo, contadorCioba, contadorTainha, contadorPorto);
+				indoPraLa = buscar_area_pesca(altura, largura, v, myX, myY, robalo, cioba, tainha, contadorRobalo, contadorCioba, contadorTainha);
+				mover(myX, myY, indoPraLa.x, indoPraLa.y, &estou_em_area_de_pesca, 0);
+				tenho_area_de_pesca=1;
+			}
+			else
+			{
+				mover(myX, myY, indoPraLa.x, indoPraLa.y, &estou_em_area_de_pesca, 0);
 			}
 
 		}
-
-		// envia a ação escolhida (nesse exemplo, ir para esquerda)
-		printf("LEFT\n");
+		else
+		{
+			printf("FISH\n");
+		}
 
 		// lê qual foi o resultado da ação (e eventualmente atualiza os dados do bot).
 		scanf("%s", line);

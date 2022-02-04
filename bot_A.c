@@ -15,6 +15,7 @@ typedef struct coordenada
 {
 	int x;
 	int y;
+	int quant;
 }Coordenada;
 
 typedef struct robalo
@@ -45,6 +46,7 @@ typedef struct porto
 
 int limite_barco = 0;
 int primeiraChecagem = 1;
+int tenho_area_de_pesca = 0;
 
 /* ADAPTAR EM FUNÇÃO DE COMO OS DADOS SERÃO ARMAZENADOS NO SEU BOT */
 void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *myY, Robalo robalo[100], Cioba cioba[100], Tainha tainha[100], Porto portos[100], int *contadorRobalo, int *contadorCioba, int *contadorTainha, int *contadorPorto)
@@ -110,7 +112,7 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 
 int produto_vetorial(int xBarco, int yBarco, int xPeixe, int yPeixe);
 
-void mover(int xBarco, int yBarco, int xLocal, int yLocal, int *estou_no_local, int porto_ou_pesca);
+void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int *estou_no_local, int porto_ou_pesca);
 
 Coordenada achar_porto(int h, int w, int v[h][w], int myX, int myY, Porto portos[100], int contadorPorto);
 
@@ -131,7 +133,6 @@ int main()
 	Coordenada indoPraLa;
 	int estou_em_area_de_pesca = 0;
 	int estou_no_porto = 0;
-	int tenho_area_de_pesca = 0;
 	int tenho_porto = 0;
 	// === INÍCIO DA PARTIDA ===
 	scanf("AREA %i %i", &altura, &largura); // lê a dimensão da área de pesca: altura (h) x largura (w)
@@ -163,11 +164,11 @@ int main()
 			if (tenho_porto == 0)
 			{
 				indoPraLa = achar_porto(largura,altura, mapa, myX, myY, portos, contadorPorto);
-				mover(myX, myY, indoPraLa.x, indoPraLa.y, &estou_no_porto, 1);
+				mover(myX, myY, &indoPraLa.quant, indoPraLa.x, indoPraLa.y, &estou_no_porto, 1);
 			}
 			else
 			{
-				mover(myX, myY, indoPraLa.x, indoPraLa.y, &estou_no_porto, 1);
+				mover(myX, myY,&indoPraLa.quant, indoPraLa.x, indoPraLa.y, &estou_no_porto, 1);
 			}
 			
 		}
@@ -177,20 +178,36 @@ int main()
 			{
 				indoPraLa = buscar_area_pesca(altura, largura, mapa, myX, myY, robalo, cioba, tainha, contadorRobalo, contadorCioba, contadorTainha);
 				fprintf(stderr, "destino X: %d e Y: %d\n", indoPraLa.x, indoPraLa.y);
-				mover(myX, myY, indoPraLa.x, indoPraLa.y, &estou_em_area_de_pesca, 0);
+				fprintf(stderr, "quantidade de peixe precoce %d\n", indoPraLa.quant);
+				mover(myX, myY, &indoPraLa.quant, indoPraLa.x, indoPraLa.y, &estou_em_area_de_pesca, 0);
 				tenho_area_de_pesca=1;
 			}
 			else
 			{
-				mover(myX, myY, indoPraLa.x, indoPraLa.y, &estou_em_area_de_pesca, 0);
+				mover(myX, myY,&indoPraLa.quant, indoPraLa.x, indoPraLa.y, &estou_em_area_de_pesca, 0);
 			}
 
 		}
 		else
 		{
-			printf("FISH\n");
-			fprintf(stderr, "Pescando\n");
-			limite_barco++;
+			if(indoPraLa.quant >1)
+			{
+				indoPraLa.quant--;
+				fprintf(stderr, "quantidade de peixe %d\n", indoPraLa.quant);
+				printf("FISH\n");
+				fprintf(stderr, "Pescando1\n");
+				limite_barco++;
+			}
+			else{
+				fprintf(stderr, "PAREI DE PESCAR1\n");
+				tenho_area_de_pesca=0;
+				estou_em_area_de_pesca=0;
+				indoPraLa = buscar_area_pesca(altura, largura, mapa, myX, myY, robalo, cioba, tainha, contadorRobalo, contadorCioba, contadorTainha);
+				fprintf(stderr, "destino X: %d e Y: %d\n", indoPraLa.x, indoPraLa.y);
+				fprintf(stderr, "quantidade de peixe precoce %d\n", indoPraLa.quant);
+				mover(myX, myY, &indoPraLa.quant, indoPraLa.x, indoPraLa.y, &estou_em_area_de_pesca, 0);
+				tenho_area_de_pesca=1;
+			}
 		}
 
 		// lê qual foi o resultado da ação (e eventualmente atualiza os dados do bot).
@@ -205,7 +222,7 @@ int produto_vetorial(int xBarco, int yBarco, int xPeixe, int yPeixe)
 	return((xBarco+xPeixe)*(xBarco+xPeixe))-((yBarco+yPeixe)*(yBarco+yPeixe));
 }
 
-void mover(int xBarco, int yBarco, int xLocal, int yLocal, int *estou_no_local, int porto_ou_pesca)
+void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int *estou_no_local, int porto_ou_pesca)
 {
 	if (xBarco != xLocal || yBarco != yLocal)
 	{
@@ -244,9 +261,20 @@ void mover(int xBarco, int yBarco, int xLocal, int yLocal, int *estou_no_local, 
 		*estou_no_local = 1;
 		if(porto_ou_pesca == 0)//pesca
 		{
-			printf("FISH\n");
-			fprintf(stderr, "Pescando\n");
-			limite_barco++;
+			if(*quant_peixe >1)
+			{
+				limite_barco++;
+				*quant_peixe = *quant_peixe-1;
+				fprintf(stderr, "quantidade de peixe %d\n", *quant_peixe);
+				printf("FISH\n");
+				fprintf(stderr, "Pescando\n");
+				
+			}
+			else{
+				fprintf(stderr, "PAREI DE PESCAR2\n");
+				tenho_area_de_pesca=0;
+				*estou_no_local=0;
+			}
 		}
 		else
 		{
@@ -324,15 +352,18 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 	{
 		coordenada_buscada.x = maisProximoTainha.x;
 		coordenada_buscada.y = maisProximoTainha.y;
+		coordenada_buscada.quant = maisProximoTainha.quant;
 	}
 	else if (pV_do_Cioba_mais_proximo >= pV_da_Tainha_mais_proximo && pV_do_Cioba_mais_proximo>=pV_do_Robalo_mais_proximo)
 	{
 		coordenada_buscada.x = maisProximoCioba.x;
 		coordenada_buscada.y = maisProximoCioba.y;
+		coordenada_buscada.quant = maisProximoCioba.quant;
 	}
 	else{
 		coordenada_buscada.x = maisProximoRobalo.x;
 		coordenada_buscada.y = maisProximoRobalo.y;
+		coordenada_buscada.quant = maisProximoRobalo.quant;
 	}
 	return coordenada_buscada;
 }

@@ -47,7 +47,10 @@ typedef struct porto
 int limite_barco = 0;
 int primeiraChecagem = 1;
 int tenho_area_de_pesca = 0;
+Coordenada coordenadas_marcadas[1000];
+int contador_marcadas = 0;
 
+int checar_coordenada_com_marcadas(int x, int y);
 /* ADAPTAR EM FUNÇÃO DE COMO OS DADOS SERÃO ARMAZENADOS NO SEU BOT */
 void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *myY, Robalo robalo[100], Cioba cioba[100], Tainha tainha[100], Porto portos[100], int *contadorRobalo, int *contadorCioba, int *contadorTainha, int *contadorPorto)
 {
@@ -77,6 +80,7 @@ void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *m
 					cioba[*contadorCioba].y=j;
 					cioba[*contadorCioba].quant=(int)(mapa[i][j]%10);
 					contadorCioba++;
+					fprintf(stderr, "cioba: %d\n", *contadorCioba);
 				}
 				if((int)(mapa[i][j]/10) == 3){//Robalo
 					robalo[*contadorRobalo].x=i;
@@ -306,6 +310,11 @@ Coordenada achar_porto(int h, int w, int v[h][w], int myX, int myY, Porto portos
 
 Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura], int myX, int myY, Robalo robalo[100], Cioba cioba[100], Tainha tainha[100], int contadorRobalo, int contadorCioba, int contadorTainha)
 {
+	for (size_t i = 0; i < contador_marcadas; i++)
+	{
+		fprintf(stderr, "Coordenada marcada: X:%d Y:%d\n", coordenadas_marcadas[i].x, coordenadas_marcadas[i].y);
+	}
+	
 	Coordenada coordenada_buscada;
 	//Nesse algoritmo os "maisProximoCioba, etc" serão achados para ser feita uma comparação depois de qual está mais perto.
 	Cioba maisProximoCioba=cioba[0];
@@ -315,8 +324,13 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 		int pVatual = produto_vetorial(myX, myY, cioba[i].x, cioba[i].y);
 		if (pVatual <= pV_do_mais_proximo)
 		{
-			maisProximoCioba = cioba[i];
-			pV_do_mais_proximo = pVatual;
+			fprintf(stderr, "oi1\n");
+			fprintf(stderr, "(%d)\n", checar_coordenada_com_marcadas(cioba[i].x, cioba[i].y));
+			if (checar_coordenada_com_marcadas(cioba[i].x, cioba[i].y)==0)
+			{
+				maisProximoCioba = cioba[i];
+				pV_do_mais_proximo = pVatual;
+			}
 		}
 	}
 	int pV_do_Cioba_mais_proximo = pV_do_mais_proximo;
@@ -328,8 +342,13 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 		int pVatual = produto_vetorial(myX, myY, robalo[i].x, robalo[i].y);
 		if (pVatual <= pV_do_mais_proximo)
 		{
-			maisProximoRobalo = robalo[i];
-			pV_do_mais_proximo = pVatual;
+			fprintf(stderr, "oi2\n");
+			fprintf(stderr, "(r:%d)\n", checar_coordenada_com_marcadas(robalo[i].x, robalo[i].y));
+			if (checar_coordenada_com_marcadas(robalo[i].x, robalo[i].y)==0)
+			{
+				maisProximoRobalo = robalo[i];
+				pV_do_mais_proximo = pVatual;
+			}
 		}
 	}
 	int pV_do_Robalo_mais_proximo = pV_do_mais_proximo;
@@ -341,20 +360,25 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 		int pVatual = produto_vetorial(myX, myY, tainha[i].x, tainha[i].y);
 		if (pVatual <= pV_do_mais_proximo)
 		{
-			maisProximoTainha = tainha[i];
-			pV_do_mais_proximo = pVatual;
+			fprintf(stderr, "oi3\n");
+			fprintf(stderr, "(t:%d)\n", checar_coordenada_com_marcadas(tainha[i].x, tainha[i].y));
+			if (checar_coordenada_com_marcadas(tainha[i].x, tainha[i].y)==0)
+			{
+				maisProximoTainha = tainha[i];
+				pV_do_mais_proximo = pVatual;
+			}
 		}
 	}
 	int pV_da_Tainha_mais_proximo = pV_do_mais_proximo;
 	//========================================================
 	//Achando definitivamente a coordenada que meu barco deve ir para ir pescar.
-	if(pV_da_Tainha_mais_proximo >= pV_do_Cioba_mais_proximo && pV_da_Tainha_mais_proximo >= pV_do_Robalo_mais_proximo)
+	if(pV_da_Tainha_mais_proximo <= pV_do_Cioba_mais_proximo && pV_da_Tainha_mais_proximo <= pV_do_Robalo_mais_proximo)
 	{
 		coordenada_buscada.x = maisProximoTainha.x;
 		coordenada_buscada.y = maisProximoTainha.y;
 		coordenada_buscada.quant = maisProximoTainha.quant;
 	}
-	else if (pV_do_Cioba_mais_proximo >= pV_da_Tainha_mais_proximo && pV_do_Cioba_mais_proximo>=pV_do_Robalo_mais_proximo)
+	else if (pV_do_Cioba_mais_proximo <= pV_da_Tainha_mais_proximo && pV_do_Cioba_mais_proximo <= pV_do_Robalo_mais_proximo)
 	{
 		coordenada_buscada.x = maisProximoCioba.x;
 		coordenada_buscada.y = maisProximoCioba.y;
@@ -365,5 +389,18 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 		coordenada_buscada.y = maisProximoRobalo.y;
 		coordenada_buscada.quant = maisProximoRobalo.quant;
 	}
+	coordenadas_marcadas[contador_marcadas] = coordenada_buscada;
+	contador_marcadas++;
 	return coordenada_buscada;
+}
+int checar_coordenada_com_marcadas(int x, int y)
+{
+	for (size_t i = 0; i < contador_marcadas; i++)
+	{
+		if (x==coordenadas_marcadas[i].x && y==coordenadas_marcadas[i].y)
+		{
+			return 1;
+		}
+	}
+	return 0;
 }

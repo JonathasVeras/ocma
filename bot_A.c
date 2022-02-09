@@ -1,9 +1,4 @@
 /********************************************************************
-  Bot-exemplo
-
-  Após receber as informações iniciais do jogo, a cada rodada esse
-  bot irá se movimentar para esquerda.
-  Cabe a você agora aprimorar sua estratégia!!!
   gcc -o bot_A bot_A.c
  ********************************************************************/
 
@@ -53,7 +48,7 @@ Coordenada coordenadas_marcadas[1000];
 int contador_marcadas = 0;
 
 int checar_coordenada_com_marcadas(int x, int y);
-/* ADAPTAR EM FUNÇÃO DE COMO OS DADOS SERÃO ARMAZENADOS NO SEU BOT */
+
 void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *myY, Robalo robalo[100], Cioba cioba[100], Tainha tainha[100], Porto portos[100], int *contadorRobalo, int *contadorCioba, int *contadorTainha, int *contadorPorto)
 {
 	//h=ALTURA e w=LARGURA
@@ -63,7 +58,6 @@ void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *m
 	*contadorCioba=0;
 	*contadorTainha=0;
 	*contadorPorto=0;
-	// lê os dados da área de pesca
 	for (int i = 0; i < h; i++)
 	{
 		for (int j = 0; j < w; j++)
@@ -101,7 +95,6 @@ void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *m
 	}
 	// lê os dados dos bots
 	scanf(" BOTS %i", &n);
-	// o " " antes de BOTS é necessário para ler o '\n' da linha anterior
 	for (int i = 0; i < n; i++)
 	{
 		scanf("%s %i %i", id, &x, &y);

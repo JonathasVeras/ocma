@@ -46,8 +46,11 @@ int tenho_area_de_pesca = 0;
 int tenho_porto = 0;
 Coordenada coordenadas_marcadas[1000];
 int contador_marcadas = 0;
+Coordenada bots[1000];
+int contador_bots = 0;
 
 int checar_coordenada_com_marcadas(int x, int y);
+int checar_outros_bots(int x, int y);
 
 void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *myY, Robalo robalo[100], Cioba cioba[100], Tainha tainha[100], Porto portos[100], int *contadorRobalo, int *contadorCioba, int *contadorTainha, int *contadorPorto)
 {
@@ -58,6 +61,7 @@ void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *m
 	*contadorCioba=0;
 	*contadorTainha=0;
 	*contadorPorto=0;
+	contador_bots=0;
 	for (int i = 0; i < h; i++)
 	{
 		for (int j = 0; j < w; j++)
@@ -102,6 +106,12 @@ void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *m
 		{
 			*myX = x;
 			*myY = y;
+		}
+		else
+		{
+			bots[contador_bots].x = x;
+			bots[contador_bots].y = y;
+			contador_bots++;
 		}
 	}
 	primeiraChecagem==0;
@@ -220,7 +230,6 @@ int main()
 				tenho_area_de_pesca=0;
 				estou_em_area_de_pesca=0;
 				indoPraLa = buscar_area_pesca(altura, largura, mapa, myX, myY, robalo, cioba, tainha, contadorRobalo, contadorCioba, contadorTainha);
-				fprintf(stderr, "coordenada bugada: x:%d y:%d\n", indoPraLa.x, indoPraLa.y);
 				while(indoPraLa.quant==1)
 				{
 					indoPraLa = buscar_area_pesca(altura, largura, mapa, myX, myY, robalo, cioba, tainha, contadorRobalo, contadorCioba, contadorTainha);
@@ -324,7 +333,7 @@ Coordenada achar_porto(int h, int w, int v[h][w], int myX, int myY, Porto portos
 	for (size_t i = 1; i < contadorPorto; i++)
 	{
 		int pVatual = produto_vetorial(myX, myY, portos[i].x, portos[i].y);
-		if (pVatual <= pV_do_mais_proximo)
+		if (pVatual <= pV_do_mais_proximo && checar_outros_bots(portos[i].x, portos[i].y)==0)
 		{
 			maisProximoPorto = portos[i];
 			pV_do_mais_proximo = pVatual;
@@ -348,7 +357,7 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 	for (size_t i = 0; i < contadorCioba; i++)
 	{
 		int pVatual = produto_vetorial(myX, myY, cioba[i].x, cioba[i].y);
-		if (pVatual <= pV_do_mais_proximo && cioba[i].quant>1)
+		if (pVatual <= pV_do_mais_proximo)
 		{
 			//fprintf(stderr, "oi1\n");
 			//fprintf(stderr, "(%d)\n", checar_coordenada_com_marcadas(cioba[i].x, cioba[i].y));
@@ -357,10 +366,14 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 				maisProximoCioba = cioba[i];
 				pV_do_mais_proximo = pVatual;
 			}*/
-			maisProximoCioba = cioba[i];
-			pV_do_mais_proximo = pVatual;
+			if(cioba[i].quant>1)
+			{
+				maisProximoCioba = cioba[i];
+				pV_do_mais_proximo = pVatual;
+			}
 		}
 	}
+	fprintf(stderr,"Cioba: %d\n", maisProximoCioba.quant);
 	int pV_do_Cioba_mais_proximo = pV_do_mais_proximo;
 
 	Robalo maisProximoRobalo=robalo[0];
@@ -368,7 +381,7 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 	for (size_t i = 1; i < contadorRobalo; i++)
 	{
 		int pVatual = produto_vetorial(myX, myY, robalo[i].x, robalo[i].y);
-		if (pVatual <= pV_do_mais_proximo && robalo[i].quant>1)
+		if (pVatual <= pV_do_mais_proximo)
 		{
 			//fprintf(stderr, "oi2\n");
 			//fprintf(stderr, "(r:%d)\n", checar_coordenada_com_marcadas(robalo[i].x, robalo[i].y));
@@ -377,10 +390,14 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 				maisProximoRobalo = robalo[i];
 				pV_do_mais_proximo = pVatual;
 			}*/
-			maisProximoRobalo = robalo[i];
-			pV_do_mais_proximo = pVatual;
+			if (robalo[i].quant>1)
+			{
+				maisProximoRobalo = robalo[i];
+				pV_do_mais_proximo = pVatual;
+			}
 		}
 	}
+	fprintf(stderr,"robalo: %d\n", maisProximoRobalo.quant);
 	int pV_do_Robalo_mais_proximo = pV_do_mais_proximo;
 	
 	Tainha maisProximoTainha=tainha[0];
@@ -401,39 +418,26 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 			pV_do_mais_proximo = pVatual;
 		}
 	}
+	fprintf(stderr,"Tainha: %d\n", maisProximoTainha.quant);
 	int pV_da_Tainha_mais_proximo = pV_do_mais_proximo;
 	//========================================================
 	//Achando definitivamente a coordenada que meu barco deve ir para ir pescar.
-	if(pV_da_Tainha_mais_proximo <= pV_do_Cioba_mais_proximo && pV_da_Tainha_mais_proximo <= pV_do_Robalo_mais_proximo && maisProximoTainha.quant>1)
-	{
-		coordenada_buscada.x = maisProximoTainha.x;
-		coordenada_buscada.y = maisProximoTainha.y;
-		coordenada_buscada.quant = maisProximoTainha.quant;
+	if (maisProximoRobalo.quant > 1 && checar_outros_bots(maisProximoRobalo.x, maisProximoRobalo.y)==0){
+		coordenada_buscada.x = maisProximoRobalo.x;
+		coordenada_buscada.y = maisProximoRobalo.y;
+		coordenada_buscada.quant = maisProximoRobalo.quant;
 	}
-	else if (pV_do_Cioba_mais_proximo <= pV_da_Tainha_mais_proximo && pV_do_Cioba_mais_proximo <= pV_do_Robalo_mais_proximo && maisProximoCioba.quant>1)
+	else if (maisProximoCioba.quant > 1 && checar_outros_bots(maisProximoCioba.x, maisProximoCioba.y)==0)
 	{
 		coordenada_buscada.x = maisProximoCioba.x;
 		coordenada_buscada.y = maisProximoCioba.y;
 		coordenada_buscada.quant = maisProximoCioba.quant;
 	}
-	else if(maisProximoRobalo.quant >1){
-		coordenada_buscada.x = maisProximoRobalo.x;
-		coordenada_buscada.y = maisProximoRobalo.y;
-		coordenada_buscada.quant = maisProximoRobalo.quant;
-	}
-	else
+	else if(maisProximoTainha.quant > 1 && checar_outros_bots(maisProximoTainha.x, maisProximoTainha.y)==0)
 	{
-		for (size_t i = 1; i < contadorRobalo; i++)
-		{
-			if (robalo[i].quant>1)
-			{
-				coordenada_buscada.x = maisProximoRobalo.x;
-				coordenada_buscada.y = maisProximoRobalo.y;
-				coordenada_buscada.quant = maisProximoRobalo.quant;
-				break;
-			}
-		}
-		
+		coordenada_buscada.x = maisProximoTainha.x;
+		coordenada_buscada.y = maisProximoTainha.y;
+		coordenada_buscada.quant = maisProximoTainha.quant;
 	}
 	coordenadas_marcadas[contador_marcadas] = coordenada_buscada;
 	contador_marcadas++;
@@ -447,6 +451,20 @@ int checar_coordenada_com_marcadas(int x, int y)
 	for (size_t i = 0; i <= contador_marcadas; i++)
 	{
 		if (x==coordenadas_marcadas[i].x && y==coordenadas_marcadas[i].y)
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
+int checar_outros_bots(int x, int y)
+{
+	/*
+	Se for 0 é porque elas não são iguais e estão no mesmo local.
+	*/
+	for (size_t i = 0; i <= contador_bots; i++)
+	{
+		if (x==bots[i].x && y==bots[i].y)
 		{
 			return 1;
 		}

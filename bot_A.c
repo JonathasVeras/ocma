@@ -48,6 +48,8 @@ Coordenada coordenadas_marcadas[1000];
 int contador_marcadas = 0;
 Coordenada bots[1000];
 int contador_bots = 0;
+int altura_do_mundo;
+int largura_do_mundo;
 
 int checar_coordenada_com_marcadas(int x, int y);
 int checar_outros_bots(int x, int y);
@@ -145,6 +147,8 @@ int main()
 	// === INÍCIO DA PARTIDA ===
 	scanf("AREA %i %i", &altura, &largura); // lê a dimensão da área de pesca: altura (h) x largura (w)
 	scanf(" ID %s", myId);		 // ...e o id do bot
+	altura_do_mundo=altura;
+	largura_do_mundo=largura;
 	// obs: o " " antes de ID é necessário para ler o '\n' da linha anterior
 	int mapa[altura][largura];
 	// Para "debugar", é possível enviar dados para a saída de erro padrão (stderr).
@@ -264,6 +268,19 @@ void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int
 	{
 		if (xBarco>xLocal)
 		{
+			if (checar_outros_bots( xBarco-1, yBarco)==0) //tem barco acima
+			{
+				if (checar_beira_mundo(xBarco-1, yBarco)) //se for true não sai do mapa
+				{
+					printf("LEFT\n");
+				}
+				else
+				{
+					printf("RIGHT\n");
+				}
+				
+			}
+			
 			fprintf(stderr, "Barco indo para %d, %d\n", xBarco-1, yBarco);
 			fprintf(stderr, "UP\n");
 			printf("UP\n");
@@ -470,4 +487,24 @@ int checar_outros_bots(int x, int y)
 		}
 	}
 	return 0;
+}
+
+int checar_beira_mundo(int x, int y)
+{
+	/*
+	Return 1 = Não sai do mapa
+	Return 0 = Sai do mapa 
+	*/
+	if(x<0 || y<0)
+	{
+		return 0;
+	}
+	else
+	{
+		if(x>largura_do_mundo || y>altura_do_mundo)
+		{
+			return 0;
+		}
+	}
+	return 1;
 }

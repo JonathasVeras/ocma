@@ -50,10 +50,11 @@ Coordenada bots[1000];
 int contador_bots = 0;
 int altura_do_mundo;
 int largura_do_mundo;
+int bool_teste;
 
 int checar_coordenada_com_marcadas(int x, int y);
 int checar_outros_bots(int x, int y);
-
+int checar_beira_mundo(int x, int y);
 void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *myY, Robalo robalo[100], Cioba cioba[100], Tainha tainha[100], Porto portos[100], int *contadorRobalo, int *contadorCioba, int *contadorTainha, int *contadorPorto)
 {
 	//h=ALTURA e w=LARGURA
@@ -287,6 +288,17 @@ void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int
 		}
 		else if (xBarco<xLocal)
 		{
+			if (checar_outros_bots( xBarco+1, yBarco)==0) //tem barco acima
+			{
+				if (checar_beira_mundo(xBarco+1, yBarco)) //se for true não sai do mapa
+				{
+					printf("LEFT\n");
+				}
+				else
+				{
+					printf("RIGHT\n");
+				}
+			}
 			fprintf(stderr, "Barco indo para %d, %d\n", xBarco+1, yBarco);
 			fprintf(stderr, "DOWN\n");
 			printf("DOWN\n");
@@ -295,12 +307,34 @@ void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int
 		{
 			if (yBarco>yLocal)
 			{
+			if (checar_outros_bots( xBarco, yBarco-1)==0) //tem barco acima
+			{
+				if (checar_beira_mundo(xBarco, yBarco-1)) //se for true não sai do mapa
+				{
+					printf("UP\n");
+				}
+				else
+				{
+					printf("DOWN\n");
+				}
+			}
 				fprintf(stderr, "Barco indo para %d, %d\n", xBarco, yBarco-1);
 				fprintf(stderr, "LEFT\n");
 				printf("LEFT\n");
 			}
 			else
 			{
+				if (checar_outros_bots( xBarco, yBarco+1)==0) //tem barco acima
+			{
+				if (checar_beira_mundo(xBarco, yBarco+1)) //se for true não sai do mapa
+				{
+					printf("UP\n");
+				}
+				else
+				{
+					printf("DOWN\n");
+				}
+			}
 				fprintf(stderr, "Barco indo para %d, %d\n", xBarco, yBarco+1);
 				fprintf(stderr, "RIGHT\n");
 				printf("RIGHT\n");

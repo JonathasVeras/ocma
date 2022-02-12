@@ -98,8 +98,10 @@ void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *m
 				portos[*contadorPorto].x = i;
 				portos[*contadorPorto].y = j;
 				*contadorPorto = *contadorPorto + 1;
+				primeiraChecagem=0;
 			}
 		}
+		
 	}
 	// lê os dados dos bots
 	scanf(" BOTS %i", &n);
@@ -118,7 +120,6 @@ void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *m
 			contador_bots++;
 		}
 	}
-	primeiraChecagem==0;
 }
 
 Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura], int myX, int myY, Robalo robalo[100], Cioba cioba[100], Tainha tainha[100], int contadorRobalo, int contadorCioba, int contadorTainha);
@@ -127,7 +128,7 @@ int produto_vetorial(int xBarco, int yBarco, int xPeixe, int yPeixe);
 
 void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int *estou_no_local, int porto_ou_pesca);
 
-Coordenada achar_porto(int h, int w, int v[h][w], int myX, int myY, Porto portos[100], int contadorPorto);
+Coordenada achar_porto(int h, int w, int myX, int myY, Porto portos[100], int contadorPorto);
 
 int main()
 {
@@ -163,7 +164,6 @@ int main()
 	// o processo quando o jogo terminar.
 	while (1)
 	{
-		int v[altura][largura];
 		int myX, myY;
 		//fprintf(stderr, "limite barco %d\n", limite_barco);
 
@@ -180,7 +180,7 @@ int main()
 			tenho_area_de_pesca=0;
 			if (tenho_porto == 0)
 			{
-				indoPraLa = achar_porto(largura,altura, mapa, myX, myY, portos, contadorPorto);
+				indoPraLa = achar_porto(largura,altura, myX, myY, portos, contadorPorto);
 				//fprintf(stderr, "destino[PORTO] X: %d e Y: %d\n", indoPraLa.x, indoPraLa.y);
 				mover(myX, myY, &indoPraLa.quant, indoPraLa.x, indoPraLa.y, &estou_no_porto, 1);
 				tenho_porto=1;
@@ -359,7 +359,6 @@ void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int
 				
 			}
 			else{
-				Coordenada indoPraLa;
 				//fprintf(stderr, "PAREI DE PESCAR2\n");
 				tenho_area_de_pesca=0;
 				*estou_no_local=0;
@@ -377,7 +376,7 @@ void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int
 	
 }
 
-Coordenada achar_porto(int h, int w, int v[h][w], int myX, int myY, Porto portos[100], int contadorPorto)
+Coordenada achar_porto(int h, int w, int myX, int myY, Porto portos[100], int contadorPorto)
 {
 	Coordenada coordenada_buscada;
 	Porto maisProximoPorto=portos[0];
@@ -426,7 +425,6 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 		}
 	}
 	//fprintf(stderr,"Cioba: %d\n", maisProximoCioba.quant);
-	int pV_do_Cioba_mais_proximo = pV_do_mais_proximo;
 
 	Robalo maisProximoRobalo=robalo[0];
 	pV_do_mais_proximo = produto_vetorial(myX, myY, robalo[0].x, robalo[0].y);
@@ -450,7 +448,6 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 		}
 	}
 	//fprintf(stderr,"robalo: %d\n", maisProximoRobalo.quant);
-	int pV_do_Robalo_mais_proximo = pV_do_mais_proximo;
 	
 	Tainha maisProximoTainha=tainha[0];
 	pV_do_mais_proximo = produto_vetorial(myX, myY, tainha[0].x, tainha[0].y);
@@ -471,7 +468,6 @@ Coordenada buscar_area_pesca(int altura, int largura, int mapa[altura][largura],
 		}
 	}
 	//fprintf(stderr,"Tainha: %d\n", maisProximoTainha.quant);
-	int pV_da_Tainha_mais_proximo = pV_do_mais_proximo;
 	//========================================================
 	//Achando definitivamente a coordenada que meu barco deve ir para ir pescar.
 	if (maisProximoRobalo.quant > 1 && checar_outros_bots(maisProximoRobalo.x, maisProximoRobalo.y)==0){

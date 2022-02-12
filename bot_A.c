@@ -270,7 +270,7 @@ void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int
 	{
 		if (xBarco>xLocal)
 		{
-			if (checar_outros_bots( xBarco-1, yBarco)==0) //tem barco acima
+			/*if (checar_outros_bots( xBarco-1, yBarco)==0) //tem barco acima
 			{
 				if (checar_beira_mundo(xBarco-1, yBarco)) //se for true não sai do mapa
 				{
@@ -281,7 +281,7 @@ void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int
 					printf("RIGHT\n");
 				}
 				
-			}
+			}*/
 			
 			//fprintf(stderr, "Barco indo para %d, %d\n", xBarco-1, yBarco);
 			//fprintf(stderr, "UP\n");
@@ -289,7 +289,7 @@ void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int
 		}
 		else if (xBarco<xLocal)
 		{
-			if (checar_outros_bots( xBarco+1, yBarco)==0) //tem barco acima
+			/*if (checar_outros_bots( xBarco+1, yBarco)==0) //tem barco acima
 			{
 				if (checar_beira_mundo(xBarco+1, yBarco)) //se for true não sai do mapa
 				{
@@ -299,7 +299,7 @@ void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int
 				{
 					printf("RIGHT\n");
 				}
-			}
+			}*/
 			//fprintf(stderr, "Barco indo para %d, %d\n", xBarco+1, yBarco);
 			//fprintf(stderr, "DOWN\n");
 			printf("DOWN\n");
@@ -308,34 +308,34 @@ void mover(int xBarco, int yBarco, int *quant_peixe, int xLocal, int yLocal, int
 		{
 			if (yBarco>yLocal)
 			{
-			if (checar_outros_bots( xBarco, yBarco-1)==0) //tem barco acima
-			{
-				if (checar_beira_mundo(xBarco, yBarco-1)) //se for true não sai do mapa
+				/*if (checar_outros_bots( xBarco, yBarco-1)==0) //tem barco acima
 				{
-					printf("UP\n");
-				}
-				else
-				{
-					printf("DOWN\n");
-				}
-			}
+					if (checar_beira_mundo(xBarco, yBarco-1)) //se for true não sai do mapa
+					{
+						printf("UP\n");
+					}
+					else
+					{
+						printf("DOWN\n");
+					}
+				}*/
 				//fprintf(stderr, "Barco indo para %d, %d\n", xBarco, yBarco-1);
 				//fprintf(stderr, "LEFT\n");
 				printf("LEFT\n");
 			}
 			else
 			{
-				if (checar_outros_bots( xBarco, yBarco+1)==0) //tem barco acima
-			{
-				if (checar_beira_mundo(xBarco, yBarco+1)) //se for true não sai do mapa
+				/*if (checar_outros_bots( xBarco, yBarco+1)==0) //tem barco acima
 				{
-					printf("UP\n");
-				}
-				else
-				{
-					printf("DOWN\n");
-				}
-			}
+					if (checar_beira_mundo(xBarco, yBarco+1)) //se for true não sai do mapa
+					{
+						printf("UP\n");
+					}
+					else
+					{
+						printf("DOWN\n");
+					}
+				}*/
 				//fprintf(stderr, "Barco indo para %d, %d\n", xBarco, yBarco+1);
 				//fprintf(stderr, "RIGHT\n");
 				printf("RIGHT\n");

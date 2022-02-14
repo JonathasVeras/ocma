@@ -1,6 +1,6 @@
 /********************************************************************
-  gcc -o bot_A bot_A.c
-  node ocma bot_A bot_B
+gcc -o johnnyBot johnnyBot.c
+node ocma johnnyBot 
  ********************************************************************/
 
 #include <stdio.h>
@@ -42,7 +42,6 @@ typedef struct porto
 }Porto;
 
 int limite_barco = 0;
-int primeiraChecagem = 1;
 int tenho_area_de_pesca = 0;
 int tenho_porto = 0;
 Coordenada coordenadas_marcadas[1000];
@@ -93,12 +92,11 @@ void readData(int h, int w, int mapa[h][w], char myId[MAX_STR], int *myX, int *m
 					*contadorRobalo = *contadorRobalo + 1;
 				}
 			}
-			else if (mapa[i][j] == 1 && primeiraChecagem) //Info dos portos.
+			else if (mapa[i][j] == 1) //Info dos portos.
 			{
 				portos[*contadorPorto].x = i;
 				portos[*contadorPorto].y = j;
 				*contadorPorto = *contadorPorto + 1;
-				primeiraChecagem=0;
 			}
 		}
 		
